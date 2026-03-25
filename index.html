@@ -4,9 +4,68 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Match Madness</title>
+    <style>
+        body {
+            font-family: sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            background-color: #f0f0f0;
+        }
+
+        #game-board {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            justify-content: center;
+            margin-top: 20px;
+            max-width: 600px;
+        }
+
+        .card {
+            width: 120px;
+            height: 120px;
+            background-color: white;
+            border: 2px solid #ccc;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2em;
+            cursor: pointer;
+        }
+
+        .card img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            border-radius: 6px;
+        }
+    </style>
 </head>
 <body>
-    <h1>Match Madness S</h1>
-    <p>Let's build a game!</p>
+    <h1>Match Madness</h1>
+    <div id="game-board"></div>
+
+    <script src="words.js"></script>
+    <script>
+        const board = document.getElementById("game-board");
+
+        words.forEach(item => {
+            // Create word card
+            const wordCard = document.createElement("div");
+            wordCard.className = "card";
+            wordCard.textContent = item.word;
+            board.appendChild(wordCard);
+
+            // Create image card
+            const imgCard = document.createElement("div");
+            imgCard.className = "card";
+            const img = document.createElement("img");
+            img.src = item.image;
+            imgCard.appendChild(img);
+            board.appendChild(imgCard);
+        });
+    </script>
 </body>
 </html>
