@@ -11,28 +11,48 @@
             flex-direction: column;
             align-items: center;
             background-color: #f0f0f0;
+            margin: 0;
+            padding: 20px;
+        }
+
+        #hud {
+            display: flex;
+            justify-content: space-between;
+            width: 100%;
+            max-width: 600px;
+            margin-bottom: 20px;
+            font-size: 1.4em;
+            font-weight: bold;
         }
 
         #game-board {
-            display: flex;
-            flex-wrap: wrap;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
             gap: 10px;
-            justify-content: center;
-            margin-top: 20px;
-            max-width: 600px;
+            max-width: 300px;
+            width: 100%;
+        }
+
+        .column {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
         }
 
         .card {
-            width: 120px;
-            height: 120px;
+            width: 100%;
+            aspect-ratio: 1;
             background-color: white;
             border: 2px solid #ccc;
             border-radius: 8px;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 1.2em;
+            font-size: 1em;
             cursor: pointer;
+            text-align: center;
+            padding: 4px;
+            box-sizing: border-box;
         }
 
         .card img {
@@ -41,31 +61,238 @@
             object-fit: cover;
             border-radius: 6px;
         }
+
+        .card.selected {
+            border-color: #4a90e2;
+            border-width: 3px;
+        }
+
+        .card.wrong {
+            border-color: red;
+            background-color: #ffe0e0;
+        }
+
+        .card.empty {
+            background-color: transparent;
+            border: 2px dashed #ccc;
+            cursor: default;
+        }
     </style>
 </head>
 <body>
     <h1>Match Madness</h1>
+    <div id="hud">
+        <span id="timer">1:45</span>
+        <span id="score">Matches: 0</span>
+    </div>
     <div id="game-board"></div>
 
     <script src="words.js"></script>
     <script>
-        const board = document.getElementById("game-board");
+        // --- Configuration ---
+        const TOTAL_TIME = 105; // 1:45 in seconds
+        const NUM_STACKS = 5;
 
-        words.forEach(item => {
-            // Create word card
-            const wordCard = document.createElement("div");
-            wordCard.className = "card";
-            wordCard.textContent = item.word;
-            board.appendChild(wordCard);
+        // --- Game State ---
+        let stacks = { images: [], words: [] };
+        let selected = null;
+        let score = 0;
+        let timeLeft = TOTAL_TIME;
+        let timerInterval = null;
+        let gameActive = false;
 
-            // Create image card
-            const imgCard = document.createElement("div");
-            imgCard.className = "card";
-            const img = document.createElement("img");
-            img.src = item.image;
-            imgCard.appendChild(img);
-            board.appendChild(imgCard);
-        });
+        // --- Build the deck ---
+        function buildDeck() {
+            // Shuffle the words array
+            const shuffled = [...words].sort(() => Math.random() - 0.5);
+
+            // Deal into layers of 5 pairs
+            const imageDeck = Array.from({ length: NUM_STACKS }, () => []);
+            const wordDeck = Array.from({ length: NUM_STACKS }, () => []);
+
+            for (let i = 0; i < shuffled.length; i += NUM_STACKS) {
+                const layer = shuffled.slice(i, i + NUM_STACKS);
+                // Shuffle which stack each word goes to within this layer
+                const positions = [...Array(NUM_STACKS).keys()].sort(() => Math.random() - 0.5);
+                const wordPositions = [...Array(NUM_STACKS).keys()].sort(() => Math.random() - 0.5);
+
+                layer.forEach((item, idx) => {
+                    imageDeck[positions[idx]].push(item);
+                    wordDeck[wordPositions[idx]].push(item);
+                });
+            }
+
+            stacks.images = imageDeck;
+            stacks.words = wordDeck;
+        }
+
+        // --- Render the board ---
+        function renderBoard() {
+            const board = document.getElementById("game-board");
+            board.innerHTML = "";
+
+            // Image columns (left 5)
+            for (let i = 0; i < NUM_STACKS; i++) {
+                const col = document.createElement("div");
+                col.className = "column";
+
+                const card = createImageCard(i);
+                col.appendChild(card);
+                board.appendChild(col);
+            }
+
+            // Word columns (right 5) - but we need 2 rows
+            // Actually let's do image row on top, word row on bottom
+            // Re-render as a 5-column grid with 2 rows
+        }
+
+        // Hmm, let's rethink the layout in the next step
+        function createImageCard(stackIndex) {
+            const stack = stacks.images[stackIndex];
+            const div = document.createElement("div");
+
+            if (stack.length === 0) {
+                div.className = "card empty";
+            } else {
+                const item = stack[0];
+                div.className = "card";
+                div.dataset.type = "image";
+                div.dataset.stack = stackIndex;
+                div.dataset.word = item.word;
+
+                const img = document.createElement("img");
+                img.src = item.image;
+                div.appendChild(img);
+                div.addEventListener("click", () => handleCardClick(div));
+            }
+            return div;
+        }
+
+        function createWordCard(stackIndex) {
+            const stack = stacks.words[stackIndex];
+            const div = document.createElement("div");
+
+            if (stack.length === 0) {
+                div.className = "card empty";
+            } else {
+                const item = stack[0];
+                div.className = "card";
+                div.dataset.type = "word";
+                div.dataset.stack = stackIndex;
+                div.dataset.word = item.word;
+                div.textContent = item.word;
+                div.addEventListener("click", () => handleCardClick(div));
+            }
+            return div;
+        }
+
+        function handleCardClick(card) {
+            if (!gameActive) return;
+            if (card.classList.contains("empty")) return;
+            if (card === selected) {
+                // Deselect
+                card.classList.remove("selected");
+                selected = null;
+                return;
+            }
+            if (selected && selected.dataset.type === card.dataset.type) {
+                // Can't select two of the same type
+                selected.classList.remove("selected");
+                selected = card;
+                card.classList.add("selected");
+                return;
+            }
+
+            if (!selected) {
+                selected = card;
+                card.classList.add("selected");
+            } else {
+                // We have two cards of different types selected
+                if (selected.dataset.word === card.dataset.word) {
+                    // Match!
+                    handleMatch(selected, card);
+                } else {
+                    // Mismatch
+                    handleMismatch(selected, card);
+                }
+            }
+        }
+
+        function handleMatch(card1, card2) {
+            score++;
+            document.getElementById("score").textContent = "Matches: " + score;
+
+            // Remove top of each stack
+            const imageCard = card1.dataset.type === "image" ? card1 : card2;
+            const wordCard = card1.dataset.type === "word" ? card1 : card2;
+
+            stacks.images[imageCard.dataset.stack].shift();
+            stacks.words[wordCard.dataset.stack].shift();
+
+            selected = null;
+
+            // Check win condition
+            if (stacks.images.every(s => s.length === 0)) {
+                endGame(true);
+                return;
+            }
+
+            refreshBoard();
+        }
+
+        function handleMismatch(card1, card2) {
+            card1.classList.add("wrong");
+            card2.classList.add("wrong");
+            selected = null;
+
+            setTimeout(() => {
+                card1.classList.remove("wrong", "selected");
+                card2.classList.remove("wrong", "selected");
+            }, 600);
+        }
+
+        function refreshBoard() {
+            const board = document.getElementById("game-board");
+            board.innerHTML = "";
+
+            for (let i = 0; i < NUM_STACKS; i++) {
+                board.appendChild(createImageCard(i));
+                board.appendChild(createWordCard(i));
+            }
+        }
+
+        function startTimer() {
+            timerInterval = setInterval(() => {
+                timeLeft--;
+                const mins = Math.floor(timeLeft / 60);
+                const secs = timeLeft % 60;
+                document.getElementById("timer").textContent =
+                    mins + ":" + (secs < 10 ? "0" : "") + secs;
+
+                if (timeLeft <= 0) {
+                    endGame(false);
+                }
+            }, 1000);
+        }
+
+        function endGame(won) {
+            gameActive = false;
+            clearInterval(timerInterval);
+            const msg = won
+                ? "You win! Time remaining: " + document.getElementById("timer").textContent
+                : "Time's up! You matched " + score + " pairs.";
+            setTimeout(() => alert(msg), 100);
+        }
+
+        // --- Start ---
+        function startGame() {
+            buildDeck();
+            refreshBoard();
+            gameActive = true;
+            startTimer();
+        }
+
+        startGame();
     </script>
 </body>
 </html>
