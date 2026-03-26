@@ -110,22 +110,29 @@
 
         // --- Build the deck ---
         function buildDeck() {
-            // Shuffle the words array
             const shuffled = [...words].sort(() => Math.random() - 0.5);
 
-            // Deal into layers of 5 pairs
             const imageDeck = Array.from({ length: NUM_STACKS }, () => []);
             const wordDeck = Array.from({ length: NUM_STACKS }, () => []);
 
             for (let i = 0; i < shuffled.length; i += NUM_STACKS) {
                 const layer = shuffled.slice(i, i + NUM_STACKS);
-                // Shuffle which stack each word goes to within this layer
                 const positions = [...Array(NUM_STACKS).keys()].sort(() => Math.random() - 0.5);
                 const wordPositions = [...Array(NUM_STACKS).keys()].sort(() => Math.random() - 0.5);
 
                 layer.forEach((item, idx) => {
-                    imageDeck[positions[idx]].push(item);
-                    wordDeck[wordPositions[idx]].push(item);
+                    // Pick a random image from this word's image pool
+                    const randomImage = item.images[Math.floor(Math.random() * item.images.length)];
+                    imageDeck[positions[idx]].push({
+                        word: item.word,
+                        file: randomImage.file,
+                        accepts: randomImage.accepts || [item.word]
+                    });
+                    wordDeck[wordPositions[idx]].push({
+                        word: item.word,
+                        file: randomImage.file,
+                        accepts: [item.word]
+                    });
                 });
             }
 
@@ -166,9 +173,10 @@
                 div.dataset.type = "image";
                 div.dataset.stack = stackIndex;
                 div.dataset.word = item.word;
+                div.dataset.accepts = JSON.stringify(item.accepts);
 
                 const img = document.createElement("img");
-                img.src = item.image;
+                img.src = item.file;
                 div.appendChild(img);
                 div.addEventListener("click", () => handleCardClick(div));
             }
@@ -188,6 +196,7 @@
                 div.dataset.stack = stackIndex;
                 div.dataset.word = item.word;
                 div.textContent = item.word;
+                div.dataset.accepts = JSON.stringify(item.accepts);
                 div.addEventListener("click", () => handleCardClick(div));
             }
             return div;
@@ -215,7 +224,11 @@
                 card.classList.add("selected");
             } else {
                 // We have two cards of different types selected
-                if (selected.dataset.word === card.dataset.word) {
+                const imageCard = selected.dataset.type === "image" ? selected : card;
+                const wordCard = selected.dataset.type === "word" ? selected : card;
+                const imageAccepts = JSON.parse(imageCard.dataset.accepts);
+
+                if (imageAccepts.includes(wordCard.dataset.word)) {
                     // Match!
                     handleMatch(selected, card);
                 } else {
