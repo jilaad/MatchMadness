@@ -128,6 +128,7 @@
         // --- Configuration ---
         const TOTAL_TIME = 105; // 1:45 in seconds
         const NUM_STACKS = 5;
+        const ROUND_SIZE = 90; // Must be a multiple of NUM_STACKS
 
         // --- Game State ---
         let stacks = { images: [], words: [] };
@@ -141,13 +142,18 @@
         // --- Build the deck ---
         function buildDeck() {
             const filtered = words.filter(w => w.type === selectedMode);
-            const shuffled = [...filtered].sort(() => Math.random() - 0.5);
+
+            // Build a round by randomly selecting ROUND_SIZE words, repeats allowed
+            const round = [];
+            for (let i = 0; i < ROUND_SIZE; i++) {
+                round.push(filtered[Math.floor(Math.random() * filtered.length)]);
+            }
 
             const imageDeck = Array.from({ length: NUM_STACKS }, () => []);
             const wordDeck = Array.from({ length: NUM_STACKS }, () => []);
 
-            for (let i = 0; i < shuffled.length; i += NUM_STACKS) {
-                const layer = shuffled.slice(i, i + NUM_STACKS);
+            for (let i = 0; i < round.length; i += NUM_STACKS) {
+                const layer = round.slice(i, i + NUM_STACKS);
                 const positions = [...Array(NUM_STACKS).keys()].sort(() => Math.random() - 0.5);
                 const wordPositions = [...Array(NUM_STACKS).keys()].sort(() => Math.random() - 0.5);
 

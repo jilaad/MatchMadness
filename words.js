@@ -205,5 +205,17 @@ const words = [
         { file: "images/lighting_like_fire02.jpg" },
         { file: "images/lighting_like_fire03.jpg" },
         { file: "images/lighting_like_fire04.jpg" }
+    ]},
+    { word: "chuletón", type: "noun", images: [
+        { file: "images/ribeye01.jpg" },
+        { file: "images/ribeye02.jpg" },
+        { file: "images/ribeye03.jpg" },
+        { file: "images/ribeye04.jpg" }
+    ]},
+    { word: "solomillo", type: "noun", images: [
+        { file: "images/sirloin01.jpg" },
+        { file: "images/sirloin02.jpg" },
+        { file: "images/sirloin03.jpg" },
+        { file: "images/sirloin04.jpg" }
     ]}
 ];
