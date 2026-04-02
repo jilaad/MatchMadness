@@ -78,7 +78,6 @@ const words = [
     { word: "menú", images: [
         { file: "images/menu01.webp" },
         { file: "images/menu02.webp" },
-        { file: "images/menu03.webp" },
         { file: "images/menu04.jpg" }
     ]},
     { word: "cuenta", images: [
@@ -99,5 +98,52 @@ const words = [
     { word: "bufé", images: [
         { file: "images/buffet01.jpg" },
         { file: "images/buffet02.webp" }
+    ]},
+    { word: "cocinero", images: [
+        { file: "images/cook01.jpg" },
+        { file: "images/cook02.jpg" },
+        { file: "images/cook03.jpg" }
+    ]},
+    { word: "botella", images: [
+        { file: "images/bottle01.jpg" },
+        { file: "images/bottle02.jpg" },
+        { file: "images/bottle03.jpg" },
+        { file: "images/bottle04.jpg" }
+    ]},
+    { word: "bandeja", images: [
+        { file: "images/tray01.jpg" },
+        { file: "images/tray02.jpg" },
+        { file: "images/tray03.jpg" },
+        { file: "images/tray04.jpg" }
+    ]},
+    { word: "propina", images: [
+        { file: "images/tip_money01.jpg" },
+        { file: "images/tip_money02.jpg" },
+        { file: "images/tip_money03.jpg" },
+        { file: "images/tip_money04.jpg" }
+    ]},
+    { word: "recibo", images: [
+        { file: "images/receipt01.jpg" },
+        { file: "images/receipt02.jpg" },
+        { file: "images/receipt03.jpg" },
+        { file: "images/receipt04.jpg" }
+    ]},
+    { word: "cocina", images: [
+        { file: "images/kitchen01.jpg" },
+        { file: "images/kitchen02.jpg" },
+        { file: "images/kitchen03.jpg" },
+        { file: "images/kitchen04.jpg" }
+    ]},
+    { word: "baño", images: [
+        { file: "images/bathroom01.jpg" },
+        { file: "images/bathroom02.jpg" },
+        { file: "images/bathroom03.jpg" },
+        { file: "images/bathroom04.jpg" }
+    ]},
+    { word: "parrilla", images: [
+        { file: "images/grill01.jpg" },
+        { file: "images/grill02.jpg" },
+        { file: "images/grill03.jpg" },
+        { file: "images/grill04.jpg" }
     ]}
 ];
