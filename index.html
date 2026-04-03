@@ -108,6 +108,20 @@
         .mode-button:hover {
             background-color: #357abd;
         }
+
+        #preview-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 8px;
+            max-width: 460px;
+            width: 100%;
+            margin-top: 20px;
+        }
+
+        .empty-card {
+            width: 100%;
+            aspect-ratio: 1;
+        }
     </style>
 </head>
 <body>
@@ -118,8 +132,16 @@
     </div>
     <div id="title-screen">
         <p>Choose a mode to begin!</p>
-        <button class="mode-button" onclick="startGame('noun')">🏠 Noun Mode</button>
-        <button class="mode-button" onclick="startGame('verb')">🏃 Verb Mode</button>
+        <button class="mode-button" onclick="selectMode('noun')">🏠 Noun Mode</button>
+        <button class="mode-button" onclick="selectMode('verb')">🏃 Verb Mode</button>
+    </div>
+    <div id="mode-buttons" style="display:none">
+        <button class="mode-button" onclick="launchPreview()">👀 Preview & Play</button>
+        <button class="mode-button" onclick="startGame()">▶️ Play</button>
+    </div>
+    <div id="preview-screen" style="display:none">
+        <div id="preview-grid"></div>
+        <button class="mode-button" onclick="startGame()" style="margin: 20px 0">▶️ Start Game</button>
     </div>
     <div id="game-board" style="display:none"></div>
 
@@ -138,17 +160,17 @@
         let timerInterval = null;
         let gameActive = false;
         let selectedMode = "noun";
+        let round = [];
 
-        // --- Build the deck ---
-        function buildDeck() {
+        function buildRound() {
             const filtered = words.filter(w => w.type === selectedMode);
-
-            // Build a round by randomly selecting ROUND_SIZE words, repeats allowed
-            const round = [];
+            round = [];
             for (let i = 0; i < ROUND_SIZE; i++) {
                 round.push(filtered[Math.floor(Math.random() * filtered.length)]);
             }
+        }
 
+        function buildDeck() {
             const imageDeck = Array.from({ length: NUM_STACKS }, () => []);
             const wordDeck = Array.from({ length: NUM_STACKS }, () => []);
 
@@ -158,7 +180,6 @@
                 const wordPositions = [...Array(NUM_STACKS).keys()].sort(() => Math.random() - 0.5);
 
                 layer.forEach((item, idx) => {
-                    // Pick a random image from this word's image pool
                     const randomImage = item.images[Math.floor(Math.random() * item.images.length)];
                     imageDeck[positions[idx]].push({
                         word: item.word,
@@ -168,7 +189,7 @@
                     wordDeck[wordPositions[idx]].push({
                         word: item.word,
                         file: randomImage.file,
-                        accepts: [item.word]
+                        accepts: randomImage.accepts || [item.word]
                     });
                 });
             }
@@ -192,12 +213,8 @@
                 board.appendChild(col);
             }
 
-            // Word columns (right 5) - but we need 2 rows
-            // Actually let's do image row on top, word row on bottom
-            // Re-render as a 5-column grid with 2 rows
         }
 
-        // Hmm, let's rethink the layout in the next step
         function createImageCard(stackIndex) {
             const stack = stacks.images[stackIndex];
             const div = document.createElement("div");
@@ -345,7 +362,7 @@
         }
 
         // --- Start ---
-        function startGame(mode) {
+        function startGame_old(mode) {
             document.getElementById("title-screen").style.display = "none";
             document.getElementById("game-board").style.display = "grid";
             selectedMode = mode;
@@ -353,6 +370,73 @@
             refreshBoard();
             gameActive = true;
             startTimer();
+        }
+
+        function selectMode(mode) {
+            selectedMode = mode;
+            buildRound();
+            document.getElementById("title-screen").style.display = "none";
+            document.getElementById("mode-buttons").style.display = "flex";
+            document.getElementById("mode-buttons").style.flexDirection = "column";
+            document.getElementById("mode-buttons").style.gap = "20px";
+        }
+
+        function launchPreview() {
+            document.getElementById("mode-buttons").style.display = "none";
+            document.getElementById("preview-screen").style.display = "block";
+            buildPreviewGrid();
+        }
+
+        function startGame() {
+            document.getElementById("title-screen").style.display = "none";
+            document.getElementById("mode-buttons").style.display = "none";
+            document.getElementById("preview-screen").style.display = "none";
+            document.getElementById("game-board").style.display = "grid";
+            buildDeck();
+            refreshBoard();
+            gameActive = true;
+            startTimer();
+        }
+
+        function buildPreviewGrid() {
+            const grid = document.getElementById("preview-grid");
+            grid.innerHTML = "";
+
+            // Get unique words from round
+            const seen = new Set();
+            const uniqueWords = round.filter(item => {
+                if (seen.has(item.word)) return false;
+                seen.add(item.word);
+                return true;
+            });
+
+            uniqueWords.forEach(item => {
+                // Word card
+                const wordCard = document.createElement("div");
+                wordCard.className = "card";
+                wordCard.textContent = item.word;
+                grid.appendChild(wordCard);
+
+                // Pick up to 3 random images
+                const shuffledImages = [...item.images].sort(() => Math.random() - 0.5);
+                const previewImages = shuffledImages.slice(0, 3);
+
+                // Add image cards, pad with empty cells if fewer than 3
+                for (let i = 0; i < 3; i++) {
+                    if (i < previewImages.length) {
+                        const imgCard = document.createElement("div");
+                        imgCard.className = "card";
+                        const img = document.createElement("img");
+                        img.src = previewImages[i].file;
+                        imgCard.appendChild(img);
+                        grid.appendChild(imgCard);
+                    } else {
+                        const empty = document.createElement("div");
+                        empty.className = "empty-card";
+                        grid.appendChild(empty);
+                    }
+                }
+            });
         }
 
     </script>
