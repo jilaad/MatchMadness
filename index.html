@@ -15,14 +15,41 @@
             padding: 20px;
         }
 
-        #hud {
+       #hud {
             display: flex;
             justify-content: space-between;
+            align-items: center;
             width: 100%;
-            max-width: 600px;
-            margin-bottom: 20px;
+            max-width: 225px;
+            background: white;
+            border-radius: 16px;
+            padding: 10px 16px;
+            box-sizing: border-box;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            margin-bottom: 12px;
+        }
+
+        #timer {
             font-size: 1.4em;
-            font-weight: bold;
+            font-weight: 700;
+            color: #e05c2a;
+            letter-spacing: 0.02em;
+        }
+
+        #timer.warning {
+            color: #cc0000;
+            animation: pulse 0.5s ease-in-out infinite alternate;
+        }
+
+        #score {
+            font-size: 1.1em;
+            font-weight: 600;
+            color: #333;
+        }
+
+        @keyframes pulse {
+            from { opacity: 1; }
+            to { opacity: 0.5; }
         }
 
         #game-board {
@@ -345,6 +372,10 @@
                 const secs = timeLeft % 60;
                 document.getElementById("timer").textContent =
                     mins + ":" + (secs < 10 ? "0" : "") + secs;
+
+                if (timeLeft <= 20) {
+                    document.getElementById("timer").classList.add("warning");
+                }
 
                 if (timeLeft <= 0) {
                     endGame(false);
