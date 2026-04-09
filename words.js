@@ -269,5 +269,29 @@ const words = [
         { file: "images/butter02.jpg" },
         { file: "images/butter03.jpg" },
         { file: "images/butter04.jpg" }
+    ]},
+    { word: "lechuga", type: "noun", images: [
+        { file: "images/lettuce01.jpg" },
+        { file: "images/lettuce02.jpg" },
+        { file: "images/lettuce03.jpg" },
+        { file: "images/lettuce04.jpg" }
+    ]},
+    { word: "zanahoria", type: "noun", images: [
+        { file: "images/carrot01.jpg" },
+        { file: "images/carrot02.jpg" },
+        { file: "images/carrot03.jpg" },
+        { file: "images/carrot04.jpg" }
+    ]},
+    { word: "champiñón", type: "noun", images: [
+        { file: "images/mushroom01.jpg" },
+        { file: "images/mushroom02.jpg" },
+        { file: "images/mushroom03.jpg" },
+        { file: "images/mushroom04.jpg" }
+    ]},
+    { word: "maíz", type: "noun", images: [
+        { file: "images/corn01.jpg" },
+        { file: "images/corn02.jpg" },
+        { file: "images/corn03.jpg" },
+        { file: "images/corn04.jpg" }
     ]}
 ];
