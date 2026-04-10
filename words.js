@@ -293,5 +293,26 @@ const words = [
         { file: "images/corn02.jpg" },
         { file: "images/corn03.jpg" },
         { file: "images/corn04.jpg" }
+    ]},
+    { word: "pimiento", type: "noun", images: [
+        { file: "images/bell_pepper01.jpg" },
+        { file: "images/bell_pepper02.jpg" },
+        { file: "images/chili_pepper01.jpg" },
+        { file: "images/chili_pepper02.jpg" }
+    ]},
+    { word: "pimienta", type: "noun", images: [
+        { file: "images/black_pepper01.jpg" },
+        { file: "images/black_pepper02.jpg" },
+        { file: "images/black_pepper03.jpg" }
+    ]},
+    { word: "repollo", type: "noun", images: [
+        { file: "images/cabbage01.jpg" },
+        { file: "images/cabbage02.jpg" },
+        { file: "images/cabbage03.jpg" }
+    ]},
+    { word: "pepino", type: "noun", images: [
+        { file: "images/cucumber01.jpg" },
+        { file: "images/cucumber02.jpg" },
+        { file: "images/cucumber03.jpg" }
     ]}
 ];
