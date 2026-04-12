@@ -440,6 +440,7 @@
         let gameActive = false;
         let selectedMode = "noun";
         let layerTemplates = [];
+        let confettiActive = false;
 
         function buildRound() {
             const filtered = words.filter(w => w.type === selectedMode);
@@ -782,7 +783,10 @@
                 wobble: Math.random() * 0.05
             }));
 
+            confettiActive = true;
+
             function draw() {
+                if (!confettiActive) return;
                 ctx.clearRect(0, 0, canvas.width, canvas.height);
                 pieces.forEach(p => {
                     ctx.save();
@@ -812,6 +816,7 @@
         gameActive = false;
 
         // Hide end screen and confetti
+        confettiActive = false;
         document.getElementById("end-screen").style.display = "none";
         document.getElementById("confetti-canvas").style.display = "none";
 
