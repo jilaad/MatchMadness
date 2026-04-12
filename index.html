@@ -16,14 +16,6 @@
             padding: 20px;
         }
 
-        h1 {
-            font-family: 'Fredoka', sans-serif;
-            font-size: 2.5em;
-            font-weight: 700;
-            color: #e05c2a;
-            margin: 10px 0;
-        }
-
        #hud {
             display: flex;
             justify-content: space-between;
@@ -140,12 +132,6 @@
             gap: 8px;
             max-width: 225px;
             width: 100%;
-        }
-
-        .column {
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
         }
 
         .card {
@@ -839,6 +825,7 @@
         document.getElementById("title-screen").style.display = "flex";
         document.getElementById("title-screen").style.flexDirection = "column";
         document.getElementById("game-board").style.display = "none";
+        document.getElementById("play-buttons").style.display = "none";
     }
 
     </script>
