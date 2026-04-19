@@ -382,17 +382,17 @@
 
         <div id="stats-row">
             <div class="stat-item">
-                <div class="stat-number noun-color">247</div>
+                <div class="stat-number noun-color" id="stat-best-score">0</div>
                 <div class="stat-label-small">best score</div>
             </div>
             <div class="stat-divider-v"></div>
             <div class="stat-item">
-                <div class="stat-number verb-color">42</div>
+                <div class="stat-number verb-color" id="stat-words-learned">0</div>
                 <div class="stat-label-small">words learned</div>
             </div>
             <div class="stat-divider-v"></div>
             <div class="stat-item">
-                <div class="stat-number noun-color">7</div>
+                <div class="stat-number noun-color" id="stat-streak">0</div>
                 <div class="stat-label-small">day streak</div>
             </div>
         </div>
@@ -439,6 +439,7 @@
         const TOTAL_TIME = 105; // 1:45 in seconds
         const NUM_STACKS = 5;
         const ROUND_SIZE = 90; // Must be a multiple of NUM_STACKS
+        const LEARNED_THRESHOLD = 10;
 
         // --- Game State ---
         let stacks = { images: [], words: [] };
@@ -450,6 +451,37 @@
         let selectedMode = "noun";
         let layerTemplates = [];
         let confettiActive = false;
+
+        function getWordProgress() {
+            try {
+                return JSON.parse(localStorage.getItem("wordProgress")) || {};
+            } catch {
+                return {};
+            }
+        }
+
+        function saveWordProgress(progress) {
+            localStorage.setItem("wordProgress", JSON.stringify(progress));
+        }
+
+        function incrementStreak(word) {
+            const progress = getWordProgress();
+            if (!progress[word]) progress[word] = { streak: 0 };
+            progress[word].streak++;
+            saveWordProgress(progress);
+        }
+
+        function resetStreak(word) {
+            const progress = getWordProgress();
+            if (!progress[word]) progress[word] = { streak: 0 };
+            progress[word].streak = 0;
+            saveWordProgress(progress);
+        }
+
+        function getLearnedCount() {
+            const progress = getWordProgress();
+            return Object.values(progress).filter(w => w.streak >= LEARNED_THRESHOLD).length;
+        }
 
         function buildRound() {
             const filtered = words.filter(w => w.type === selectedMode);
@@ -635,6 +667,7 @@
             stacks.images[imageCard.dataset.stack].shift();
             stacks.words[wordCard.dataset.stack].shift();
 
+            incrementStreak(wordCard.dataset.word);
             selected = null;
             
 
@@ -649,6 +682,7 @@
         function handleMismatch(card1, card2) {
             card1.classList.add("wrong");
             card2.classList.add("wrong");
+            resetStreak(card2.dataset.type === "word" ? card2.dataset.word : card1.dataset.word);
             selected = null;
 
             setTimeout(() => {
@@ -688,6 +722,7 @@
         function endGame(won) {
             gameActive = false;
             clearInterval(timerInterval);
+            updatePlayStreak();
 
             const finalScore = score + timeLeft;
 
@@ -835,12 +870,58 @@
         document.getElementById("score").textContent = "Matches: 0";
         document.getElementById("hud").style.display = "none";
 
+        updateTitleStats();
+
         // Go back to title screen
         document.getElementById("title-screen").style.display = "flex";
         document.getElementById("title-screen").style.flexDirection = "column";
         document.getElementById("game-board").style.display = "none";
         document.getElementById("play-buttons").style.display = "none";
     }
+
+    function getTodayString() {
+        return new Date().toISOString().split("T")[0]; // "2026-04-19" format
+    }
+
+    function updatePlayStreak() {
+        const today = getTodayString();
+        const lastPlayed = localStorage.getItem("lastPlayed");
+        let playStreak = parseInt(localStorage.getItem("playStreak")) || 0;
+
+        if (lastPlayed === today) {
+            // Already played today, no change
+            return;
+        }
+
+        const yesterday = new Date();
+        yesterday.setDate(yesterday.getDate() - 1);
+        const yesterdayString = yesterday.toISOString().split("T")[0];
+
+        if (lastPlayed === yesterdayString) {
+            // Played yesterday, increment streak
+            playStreak++;
+        } else {
+            // Gap in play, reset streak
+            playStreak = 1;
+        }
+
+        localStorage.setItem("playStreak", playStreak);
+        localStorage.setItem("lastPlayed", today);
+    }
+
+    function updateTitleStats() {
+        const pbNoun = parseInt(localStorage.getItem("pb_noun")) || 0;
+        const pbVerb = parseInt(localStorage.getItem("pb_verb")) || 0;
+        const bestScore = Math.max(pbNoun, pbVerb);
+        const playStreak = parseInt(localStorage.getItem("playStreak")) || 0;
+        const learnedCount = getLearnedCount();
+
+        document.getElementById("stat-best-score").textContent = bestScore;
+        document.getElementById("stat-words-learned").textContent = learnedCount;
+        document.getElementById("stat-streak").textContent = playStreak;
+    }
+
+    updateTitleStats();
 
     </script>
 </body>
